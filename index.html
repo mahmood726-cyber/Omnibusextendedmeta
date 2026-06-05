@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>786-M14 Omnibus Extended</title>
-    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="plotly.min.js"></script>
+    <!-- fonts removed for offline use -->
+    <script src="engine.js"></script>
     <script id="saved-state-script">window.SAVED_STATE=null;</script>
     <style>
         :root { --p: #1e293b; --a: #2563eb; --bg: #f8fafc; --b: #e2e8f0; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; }
@@ -292,206 +293,8 @@
 </main>
 
 <script>
-// --- MATH KERNEL ---
-if(!Math.erf){Math.erf=function(x){var s=(x>=0)?1:-1;x=Math.abs(x);var t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x))}}
-const Stat={pnorm:z=>0.5*(1+Math.erf(z/Math.sqrt(2))),qnorm:p=>{var a1=-39.6968302866538,a2=220.946098424521,a3=-275.928510446969,a4=138.357751867269,a5=-30.6647980661472,a6=2.50662827745924;var b1=-54.4760987982241,b2=161.585836858041,b3=-155.698979859887,b4=66.8013118877197,b5=-13.2806815528857;var c1=-7.78489400243029e-03,c2=-3.22396458041136e-01,c3=-2.40075827716184,c4=-2.54973253934373,c5=4.37466414146497,c6=2.93816398269878;var d1=7.78469570904146e-03,d2=3.22467129070040e-01,d3=2.44513413714300,d4=3.75440866190742;var q,r;if(p<0.02425){q=Math.sqrt(-2*Math.log(p));return(((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6)/((((d1*q+d2)*q+d3)*q+d4)*q+1)}else if(p>1-0.02425){q=Math.sqrt(-2*Math.log(1-p));return-(((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6)/((((d1*q+d2)*q+d3)*q+d4)*q+1)}else{q=p-0.5;r=q*q;return(((((a1*r+a2)*r+a3)*r+a4)*r+a5)*r+a6)*q/(((((b1*r+b2)*r+b3)*r+b4)*r+b5)*r+1)}},qt:(p,df)=>{const x=Stat.qnorm(p),g=(x*x+1)/4;return x*(1+(g/df)+(g*g*5/96)/(df*df))},invLogit:x=>Math.exp(x)/(1+Math.exp(x))};
-const Matrix={zeros:(r,c)=>Array(r).fill(0).map(()=>Array(c).fill(0)),t:m=>m[0].map((_,i)=>m.map(r=>r[i])),dot:(a,b)=>{const r1=a.length,c1=a[0].length,c2=b[0].length,r=new Float64Array(r1*c2);for(let i=0;i<r1;i++)for(let j=0;j<c2;j++){let s=0;for(let k=0;k<c1;k++)s+=a[i][k]*b[k][j];r[i*c2+j]=s}const R=[];for(let i=0;i<r1;i++)R.push(Array.from(r.slice(i*c2,(i+1)*c2)));return R},inv:m=>{const n=m.length,A=m.map(r=>[...r]),I=Matrix.zeros(n,n);for(let i=0;i<n;i++)I[i][i]=1;for(let i=0;i<n;i++){let p=i,mx=Math.abs(A[i][i]);for(let k=i+1;k<n;k++)if(Math.abs(A[k][i])>mx){p=k;mx=Math.abs(A[k][i])}[A[i],A[p]]=[A[p],A[i]];[I[i],I[p]]=[I[p],I[i]];const d=A[i][i];if(Math.abs(d)<1e-12)continue;for(let j=0;j<n;j++){A[i][j]/=d;I[i][j]/=d}for(let k=0;k<n;k++)if(k!==i){const f=A[k][i];for(let j=0;j<n;j++){A[k][j]-=f*A[i][j];I[k][j]-=f*I[i][j]}}}return I}};
-const Optim={nelderMead:(f,x0)=>{let s=x0.map((v,i)=>{let x=[...x0];x[i]+=0.05;return x});s.unshift(x0);let fs=s.map(f);for(let k=0;k<300;k++){const idx=fs.map((v,i)=>[v,i]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]),b=s[idx[0]],w=s[idx[s.length-1]],c=b.map((_,i)=>s.reduce((a,x,j)=>j===idx[s.length-1]?a:a+x[i],0)/(s.length-1)),r=c.map((v,i)=>v+(v-w[i])),fr=f(r);if(fr<fs[idx[0]]){const e=c.map((v,i)=>v+2*(v-w[i])),fe=f(e);if(fe<fr){s[idx[s.length-1]]=e;fs[idx[s.length-1]]=fe}else{s[idx[s.length-1]]=r;fs[idx[s.length-1]]=fr}}else if(fr<fs[idx[s.length-2]]){s[idx[s.length-1]]=r;fs[idx[s.length-1]]=fr}else{const ct=c.map((v,i)=>v+0.5*(w[i]-v)),fc=f(ct);if(fc<fs[idx[s.length-1]]){s[idx[s.length-1]]=ct;fs[idx[s.length-1]]=fc}else{for(let i=1;i<s.length;i++){s[idx[i]]=s[idx[i]].map((v,j)=>b[j]+0.5*(v-b[j]));fs[idx[i]]=f(s[idx[i]])}}}}let mv=Infinity,mi=0;for(let i=0;i<fs.length;i++)if(!isNaN(fs[i])&&fs[i]<mv){mv=fs[i];mi=i}return s[mi]}};
-
-// --- MULTILEVEL & RVE MODULES ---
-const Multilevel = {
-    fit: (Y, V, cluster, opts = {}) => {
-        const n = Y.length;
-        const maxIter = opts.maxIter || 100;
-        const tol = opts.tol || 1e-6;
-        const clusters = [...new Set(cluster)];
-        const m = clusters.length;
-        
-        const muInit = Y.reduce((a, b) => a + b, 0) / n;
-        const ssTotal = Y.reduce((a, y) => a + (y - muInit) ** 2, 0);
-        let sig2_w = Math.max(0.01, ssTotal / n - V.reduce((a, b) => a + b, 0) / n);
-        let sig2_b = sig2_w / 2;
-        
-        let mu = muInit, prevLL = -Infinity;
-        
-        for (let iter = 0; iter < maxIter; iter++) {
-            const Sigma = Matrix.zeros(n, n);
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    if (i === j) Sigma[i][j] = V[i] + sig2_w + sig2_b;
-                    else if (cluster[i] === cluster[j]) Sigma[i][j] = sig2_b;
-                }
-            }
-            const W = Matrix.inv(Sigma);
-            let sumW = 0, sumWY = 0;
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    sumW += W[i][j];
-                    sumWY += W[i][j] * Y[j];
-                }
-            }
-            mu = sumWY / sumW;
-            const r = Y.map(y => y - mu);
-            const P = W.map((row, i) => row.map((w, j) => {
-                let adj = 0;
-                for (let a = 0; a < n; a++) adj += W[i][a];
-                for (let b = 0; b < n; b++) adj *= W[b][j] / sumW;
-                return w - adj;
-            }));
-            let tr_Pw = 0, tr_Pb = 0, tr_Pww = 0, tr_Pbb = 0;
-            let rPr = 0;
-            for (let i = 0; i < n; i++) {
-                tr_Pw += P[i][i];
-                rPr += r[i] * P[i].reduce((a, p, j) => a + p * r[j], 0);
-                for (let j = 0; j < n; j++) {
-                    tr_Pww += P[i][j] * P[j][i];
-                    if (cluster[i] === cluster[j]) {
-                        tr_Pb += P[i][j];
-                        tr_Pbb += P[i].reduce((a, p, k) => a + (cluster[k] === cluster[j] ? p * P[k][j] : 0), 0);
-                    }
-                }
-            }
-            const score_w = -0.5 * tr_Pw + 0.5 * r.reduce((a, ri, i) => a + ri * P[i].reduce((s, p, j) => s + p * r[j], 0), 0);
-            const score_b = -0.5 * tr_Pb + 0.5 * r.reduce((a, ri, i) => a + ri * P[i].reduce((s, p, j) => s + (cluster[i] === cluster[j] ? p * r[j] : 0), 0), 0);
-            const step = 0.5;
-            sig2_w = Math.max(0, sig2_w + step * score_w / Math.max(1, Math.abs(tr_Pww)));
-            sig2_b = Math.max(0, sig2_b + step * score_b / Math.max(1, Math.abs(tr_Pbb)));
-            const ll = -0.5 * (n * Math.log(2 * Math.PI) + rPr); // Approx LL
-            if (Math.abs(ll - prevLL) < tol) break;
-            prevLL = ll;
-        }
-        const totalVar = sig2_w + sig2_b + V.reduce((a, b) => a + b, 0) / n;
-        const Sigma = Matrix.zeros(n, n);
-        for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if(i===j) Sigma[i][j] = V[i] + sig2_w + sig2_b; else if(cluster[i] === cluster[j]) Sigma[i][j] = sig2_b;
-        const W = Matrix.inv(Sigma);
-        let sumW = 0; for(let i=0;i<n;i++)for(let j=0;j<n;j++) sumW+=W[i][j];
-        
-        const se = Math.sqrt(1/sumW);
-        const pi_se = Math.sqrt(se**2 + sig2_w + sig2_b);
-        const crit = 1.96;
-
-        return {
-            est: mu,
-            se: se,
-            ci: [mu - crit*se, mu + crit*se],
-            pi: [mu - crit*pi_se, mu + crit*pi_se],
-            I2_2: (sig2_w / totalVar) * 100,
-            I2_3: (sig2_b / totalVar) * 100,
-            I2_total: ((sig2_w+sig2_b)/totalVar)*100,
-            sig2_w, sig2_b
-        };
-    }
-};
-
-const RVE = {
-    fit: (Y, V, cluster) => {
-        const n = Y.length, clusters = [...new Set(cluster)], m = clusters.length;
-        const w = V.map(v => 1 / v), sumW = w.reduce((a, b) => a + b, 0);
-        const mu = Y.reduce((a, y, i) => a + w[i] * y, 0) / sumW;
-        const r = Y.map(y => y - mu);
-        const bread = 1 / (sumW ** 2);
-        let meat = 0;
-        clusters.forEach(c => {
-            const idx = cluster.map((cl, i) => cl === c ? i : -1).filter(i => i >= 0);
-            const clusterSum = idx.reduce((a, i) => a + w[i] * r[i], 0);
-            meat += clusterSum ** 2;
-        });
-        const varRobust = bread * meat * (m / (m - 1));
-        const se = Math.sqrt(varRobust);
-        const df = m - 1;
-        const crit = Stat.qt(0.975, df);
-        return { 
-            est: mu, 
-            se: se,
-            ci: [mu - crit*se, mu + crit*se]
-        };
-    }
-};
-
-const NMA_RE = {
-    solve: (con, txs, ref, opts = {}) => {
-        const method = opts.method || 'dl';
-        const lst = txs.filter(t => t !== ref), k = con.length, p = lst.length;
-        const Y = con.map(c => [c.te]), X = Matrix.zeros(k, p);
-        con.forEach((c, i) => {
-            const i2 = lst.indexOf(c.t2), i1 = lst.indexOf(c.t1);
-            if (i2 !== -1) X[i][i2] = 1; if (i1 !== -1) X[i][i1] = -1;
-        });
-        const sm = {}; con.forEach((c, i) => { if (!sm[c.study]) sm[c.study] = []; sm[c.study].push(i); });
-        const buildV = (tau2) => {
-            const V = Matrix.zeros(k, k);
-            Object.values(sm).forEach(idx => {
-                if (idx.length === 1) V[idx[0]][idx[0]] = con[idx[0]].var + tau2;
-                else { const cv = con[idx[0]].cov; idx.forEach(i => idx.forEach(j => { V[i][j] = (i === j) ? con[i].var + tau2 : cv; })); }
-            }); return V;
-        };
-        let tau2 = 0;
-        // Simple Q calc for DL
-        const V0 = buildV(0), W0 = Matrix.inv(V0), Xt = Matrix.t(X);
-        const Vb0 = Matrix.inv(Matrix.dot(Matrix.dot(Xt, W0), X)), b0 = Matrix.dot(Matrix.dot(Vb0, Matrix.dot(Xt, W0)), Y);
-        let Q = 0; con.forEach((c, i) => {
-            const i2 = lst.indexOf(c.t2), i1 = lst.indexOf(c.t1); let pred = 0;
-            if (i2 !== -1) pred += b0[i2][0]; if (i1 !== -1) pred -= b0[i1][0];
-            Q += (c.te - pred) ** 2 / c.var;
-        });
-        const df = k - p;
-        if (method === 'dl' && Q > df) {
-            const sumW = con.reduce((a, c) => a + 1 / c.var, 0); const sumW2 = con.reduce((a, c) => a + 1 / c.var ** 2, 0);
-            tau2 = Math.max(0, (Q - df) / (sumW - sumW2 / sumW));
-        }
-        if (method === 'reml') {
-            for (let iter = 0; iter < 20; iter++) {
-                const V = buildV(tau2), W = Matrix.inv(V);
-                const Vb = Matrix.inv(Matrix.dot(Matrix.dot(Xt, W), X)), b = Matrix.dot(Matrix.dot(Vb, Matrix.dot(Xt, W)), Y);
-                let rss = 0; con.forEach((c, i) => {
-                    const i2 = lst.indexOf(c.t2), i1 = lst.indexOf(c.t1); let pred = 0;
-                    if (i2 !== -1) pred += b[i2][0]; if (i1 !== -1) pred -= b[i1][0];
-                    rss += (c.te - pred) ** 2 * W[i][i];
-                });
-                const newTau2 = Math.max(0, tau2 + (rss - (k - p)) / (k - p));
-                if (Math.abs(newTau2 - tau2) < 1e-6) break; tau2 = newTau2;
-            }
-        }
-        const V = buildV(tau2), W = Matrix.inv(V), Vb = Matrix.inv(Matrix.dot(Matrix.dot(Xt, W), X)), b = Matrix.dot(Matrix.dot(Vb, Matrix.dot(Xt, W)), Y);
-        const est = {}; est[ref] = { est: 0, se: 0 }; lst.forEach((t, i) => { est[t] = { est: b[i][0], se: Math.sqrt(Vb[i][i]) }; });
-        return { est, Vb, lst, ref, VFull: V, tau2, Q, df, I2: Math.max(0, (Q - df) / Q) * 100 };
-    }
-};
-
-const NMA_Multilevel = {
-    solve: (con, txs, ref) => {
-        const lst = txs.filter(t => t !== ref), k = con.length, p = lst.length;
-        const Y = con.map(c => [c.te]), X = Matrix.zeros(k, p);
-        con.forEach((c, i) => {
-            const i2 = lst.indexOf(c.t2), i1 = lst.indexOf(c.t1);
-            if (i2 !== -1) X[i][i2] = 1; if (i1 !== -1) X[i][i1] = -1;
-        });
-        let tau2_w = 0.05, tau2_b = 0.05;
-        for (let iter = 0; iter < 10; iter++) {
-            const V = Matrix.zeros(k, k);
-            for (let i = 0; i < k; i++) {
-                for (let j = 0; j < k; j++) {
-                    if (i === j) V[i][j] = con[i].var + tau2_w + tau2_b;
-                    else if (con[i].study === con[j].study) V[i][j] = con[i].cov + tau2_b;
-                    else if ((con[i].cluster||con[i].study) === (con[j].cluster||con[j].study)) V[i][j] = tau2_b;
-                }
-            }
-            const W = Matrix.inv(V), Xt = Matrix.t(X), Vb = Matrix.inv(Matrix.dot(Matrix.dot(Xt, W), X)), b = Matrix.dot(Matrix.dot(Vb, Matrix.dot(Xt, W)), Y);
-            let ss_w = 0, n_w = 0;
-            con.forEach((c, i) => {
-                const i2 = lst.indexOf(c.t2), i1 = lst.indexOf(c.t1); let pred = 0;
-                if (i2 !== -1) pred += b[i2][0]; if (i1 !== -1) pred -= b[i1][0];
-                ss_w += (c.te - pred) ** 2 - c.var; n_w++;
-            });
-            tau2_w = Math.max(0, ss_w / n_w - tau2_b);
-        }
-        const V = Matrix.zeros(k, k); // Final V
-        for(let i=0;i<k;i++)for(let j=0;j<k;j++) if(i===j)V[i][j]=con[i].var+tau2_w+tau2_b; else if(con[i].study===con[j].study)V[i][j]=con[i].cov+tau2_b; else if((con[i].cluster||con[i].study)===(con[j].cluster||con[j].study))V[i][j]=tau2_b;
-        const W = Matrix.inv(V), Xt = Matrix.t(X), Vb = Matrix.inv(Matrix.dot(Matrix.dot(Xt, W), X)), b = Matrix.dot(Matrix.dot(Vb, Matrix.dot(Xt, W)), Y);
-        const est = {}; est[ref] = { est: 0, se: 0 }; lst.forEach((t, i) => { est[t] = { est: b[i][0], se: Math.sqrt(Vb[i][i]) }; });
-        return { est, Vb, lst, ref, VFull: V, tau2: tau2_w+tau2_b, Q: 0, I2: 0, tau2_w, tau2_b };
-    }
-};
+// All pure stat functions/objects live in engine.js (single source of truth),
+// loaded via the engine.js script tag in head. The code below is DOM/Plotly only.
 
 // --- APP ---
 const App={type:'binary',data:[],init:()=>{App.loadEx('nma')},nav:(v,e)=>{document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));if(e)e.target.classList.add('active');if(v==='rob')RoB.init();if(v==='grade')GRADE.calc()},switchType:()=>{App.type=document.getElementById('data-type').value;App.renderTable()},getData:()=>{const r=[];document.querySelectorAll('#editor-table tbody tr').forEach(tr=>{const i=tr.querySelectorAll('input');if(i[0].value){const b={id:i[0].value,t:i[1].value};if(App.type==='binary'){b.e=Number(i[2].value);b.n=Number(i[3].value)}else if(App.type==='cont'){b.m=Number(i[2].value);b.s=Number(i[3].value);b.n=Number(i[4].value)}else if(App.type==='dta'){b.tp=Number(i[2].value);b.fp=Number(i[3].value);b.fn=Number(i[4].value);b.tn=Number(i[5].value)}else{b.dose=Number(i[2].value);b.e=Number(i[3].value);b.n=Number(i[4].value)}r.push(b)}});return r},renderTable:()=>{const h=document.querySelector('#editor-table thead'),b=document.querySelector('#editor-table tbody');b.innerHTML='';let c=App.type==='binary'?['ID','Treat','Ev','N']:App.type==='cont'?['ID','Treat','Mean','SD','N']:App.type==='dta'?['ID','Test','TP','FP','FN','TN']:['ID','Treat','Dose','Ev','N'];h.innerHTML=`<tr>${c.map(x=>`<th>${x}</th>`).join('')}<th></th></tr>`;App.data.forEach(r=>App.addTableRow(r));App.addTableRow({})},addTableRow:r=>{const tr=document.createElement('tr'),m=v=>`<td><input value="${v!==undefined?v:''}"></td>`;let h=m(r.id)+m(r.t);if(App.type==='binary')h+=m(r.e)+m(r.n);else if(App.type==='cont')h+=m(r.m)+m(r.s)+m(r.n);else if(App.type==='dta')h+=m(r.tp)+m(r.fp)+m(r.fn)+m(r.tn);else h+=m(r.dose)+m(r.e)+m(r.n);h+=`<td><button class="btn" style="color:red;border:none" onclick="this.closest('tr').remove()">×</button></td>`;tr.innerHTML=h;tr.querySelector('input').addEventListener('input',()=>{if(!tr.nextSibling)App.addTableRow({})});document.querySelector('#editor-table tbody').appendChild(tr)},addRow:()=>App.addTableRow({}),pasteData:async()=>{try{const t=await navigator.clipboard.readText();App.data=t.split(/\r?\n/).filter(r=>r.trim()).map(r=>{const c=r.split(/\t/),o={id:c[0],t:c[1]};if(App.type==='binary'){o.e=c[2];o.n=c[3]}return o});App.renderTable()}catch(e){alert("Clipboard Error")}},loadEx:k=>{if(k==='nma'){App.type='binary';App.data=[{id:'S1',t:'Plac',e:10,n:100},{id:'S1',t:'A',e:20,n:100},{id:'S1',t:'B',e:25,n:100},{id:'S2',t:'Plac',e:15,n:150},{id:'S2',t:'A',e:30,n:150}]}else if(k==='cnma'){App.type='binary';App.data=[{id:'S1',t:'Plac',e:10,n:100},{id:'S1',t:'A+B',e:30,n:100},{id:'S2',t:'A',e:20,n:100},{id:'S2',t:'A+B',e:35,n:100}]}else if(k==='dta'){App.type='dta';App.data=[{id:'S1',t:'Test',tp:40,fp:10,fn:5,tn:45},{id:'S2',t:'Test',tp:70,fp:20,fn:10,tn:100},{id:'S3',t:'Test',tp:25,fp:5,fn:2,tn:30}]}document.getElementById('data-type').value=App.type;App.renderTable()},download:()=>{const h=document.documentElement.outerHTML.replace('window.SAVED_STATE=null;',`window.SAVED_STATE=${JSON.stringify(App.getData())};`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='786-M14.html';a.click()},exportR:()=>{alert("R code copied")},
@@ -544,25 +347,8 @@ const Pairwise={
         const egg = Pairwise.egger(eff);
         document.getElementById('pw-egger').innerText = `Egger's Test: Intercept=${egg.int.toFixed(2)} (p=${egg.p.toFixed(3)})`;
     },
-    pool:(eff,mod)=>{
-        let w=eff.map(e=>e.w);const sW=w.reduce((a,b)=>a+b,0),mu=eff.reduce((a,e,i)=>a+e.te*w[i],0)/sW;
-        const Q=eff.reduce((a,e,i)=>a+w[i]*(e.te-mu)**2,0),df=eff.length-1,tau2=Math.max(0,(Q-df)/(sW-w.reduce((a,b)=>a+b*b,0)/sW));
-        if(mod.includes('h')||mod==='dl')w=eff.map(e=>1/(e.se**2+tau2));
-        const swr=w.reduce((a,b)=>a+b,0),est=w.reduce((a,x,i)=>a+x*eff[i].te,0)/swr,se=Math.sqrt(1/swr);
-        let crit=1.96,adj=se; if(mod==='hk'){crit=Stat.qt(0.975,df);adj=se*Math.sqrt(Math.max(1,Q/df))} 
-        const pi=Math.sqrt(adj**2+tau2);
-        return {est,se:adj,lo:est-crit*adj,hi:est+crit*adj,i2:Math.max(0,(Q-df)/Q),pi_lo:est-crit*pi,pi_hi:est+crit*pi};
-    },
-    egger:(eff)=>{
-        const n=eff.length; if(n<3) return {int:0,p:1};
-        const x=eff.map(e=>1/e.se), y=eff.map(e=>e.te/e.se);
-        const mx=x.reduce((a,b)=>a+b,0)/n, my=y.reduce((a,b)=>a+b,0)/n;
-        const b1=x.reduce((a,xi,i)=>a+(xi-mx)*(y[i]-my),0)/x.reduce((a,xi)=>a+(xi-mx)**2,0), b0=my-b1*mx;
-        const sse=y.reduce((a,yi,i)=>a+(yi-(b0+b1*x[i]))**2,0), seRes=Math.sqrt(sse/(n-2));
-        const seB0=seRes*Math.sqrt(1/n + (mx**2)/x.reduce((a,xi)=>a+(xi-mx)**2,0));
-        const t=b0/seB0, p=2*(1-Stat.pnorm(Math.abs(t)));
-        return {int:b0, p:p};
-    }
+    pool:(eff,mod)=>Pooling.pool(eff,mod),   // delegates to engine.js (single source of truth)
+    egger:(eff)=>Pooling.egger(eff)          // delegates to engine.js (single source of truth)
 };
 
 // --- NMA ---
